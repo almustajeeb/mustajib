@@ -577,6 +577,10 @@ aside#rail{display:none!important}
 .ctascard .ctype,.ctascard .en,.ctascard .ctasr small,.ctascard .ctasmore,.ctascard .also,.ctascard .ctasscale{display:none!important}
 .sumhead .chip,.sumhead .timechip{display:none}
 .sumtable tr:has(td .none){display:none}
+.adapt.simple h1{font-size:30px;margin:4px 0 6px}
+.adapt.simple .adsub{color:var(--muted);margin:0 0 14px;font-size:17px}
+.adapt.simple .adgo{margin:16px 0 6px}
+.adapt.simple .adgo .btn{min-width:240px;min-height:64px;font-size:24px}
 </style>
 <link rel="manifest" href="app.webmanifest">
 <meta name="theme-color" content="#1B2B4B">
@@ -768,6 +772,8 @@ const female=()=>A.look.sex==='f';
    3 · Emergency department — the same core, then safety before tests (allergies, medicines, pregnancy), consent, preferences, needs and the patient's questions. */
 const Q=[
  {id:'start',sec:'start',type:'start'},
+ {id:'age',sec:'event',type:'single',g:'age',pro:AD,ask:'كم عمرك تقريبًا؟',e:'About how old are you?'},
+ {id:'page',sec:'event',type:'single',g:'page',pro:KD,ask:'كم عمر الطفل تقريبًا؟',e:'About how old is the child?'},
  {ph:'scene',id:'look',sec:'look',type:'look',pro:AD},
  {ph:'scene',id:'pat',sec:'look',type:'pat',pro:KD},
  {ph:'scene',id:'understand',sec:'greet',type:'yn',pro:AD,ask:'السلام عليكم، أنا مسعف وجئت لمساعدتك. هل تسمعني وتفهمني؟',e:'Hello, I am a paramedic here to help you. Can you hear and understand me?'},
@@ -918,7 +924,7 @@ const AXH={
  gaze:'في العرض: حرّك المؤشر إلى الخيار (أو اضغط عليه مطوّلًا) وثبّته حتى تمتلئ الدائرة، كما تثبّت الحالة نظرها.',
  scan:'التحديد البرتقالي يتنقل وحده. تضغط الحالة أي مكان في الشاشة، أو مفتاحًا خارجيًا (زر المسافة في العرض)، عندما يصل للصورة المطلوبة.'
 };
-const PRESETS=[
+const PRESETS0=[
  {id:'spast',lv:'touch',i:'tremor',t:'تشنّج أو رعاش',d:'ضغط مطوّل للاختيار، وتجاهل اللمسات المتكررة، وأهداف أكبر',set:{access:'hold',hold:1000,guard:1000,size:'l'}},
  {id:'weak',lv:'touch',i:'weak',t:'ضعف أو حركة محدودة',d:'لمسة خفيفة تكفي، وأهداف كبيرة',set:{access:'down',size:'l',guard:500}},
  {id:'accur',lv:'touch',i:'finger',t:'ضعف دقة الإشارة',d:'يلمس ويسحب إصبعه ثم يرفعه على الصورة',set:{access:'release',size:'l'}},
@@ -931,6 +937,7 @@ const PRESETS=[
  {id:'lang',i:'globe',t:'لا يتحدث العربية',d:'الصور والسؤال بلغة الحالة: الإنجليزية أو الأردية أو الفرنسية، مع العربية',set:{lang:'en',caption:'both'}},
  {id:'night',i:'moon',t:'إضاءة منخفضة أو حساسية للضوء',d:'خلفية داكنة مريحة للعين',set:{theme:'dark'}}
 ];
+const PRESETS=PRESETS0.filter(p=>!['switch','deaf','lang'].includes(p.id));
 let CFG={...DEF};
 function base(){return {...DEF,...(S&&S.mode==='gaze'?{access:'gaze',size:'l'}:{})}}
 function recompute(){CFG=base();PRESETS.filter(p=>S.presets.has(p.id)).forEach(p=>Object.assign(CFG,p.set));Object.assign(CFG,S.manual)}
@@ -944,11 +951,12 @@ function reset(keepPatient){
   recompute();
 }
 [['what',['weak','seizure','wound','burn']],['pwhat',['burn','seizure','cry','limp']]].forEach(([g,ids])=>{G[g]=G[g].filter(x=>!ids.includes(x.id))});
+G.age=G.age.filter(x=>x.id!=='unk').concat(G.age.filter(x=>x.id==='unk'));
 reset();
 const $=id=>document.getElementById(id);
 const cur=()=>Q[S.i];
 const modeOk=q=>!q.m||q.m==='all'||!S.mode||(q.m==='unc'?S.mode==='unc':S.mode!=='unc');
-const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(['look','pat','meas','handover'].includes(q.type))return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return !q.show||q.show()};
+const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(['look','pat','meas','handover'].includes(q.type)||q.id==='reliab')return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return !q.show||q.show()};
 const label=(g,id)=>(G[g].find(x=>x.id===id)||{}).t||id;
 const answered=q=>{const v=q.type==='look'?A.look:q.type==='pat'?A.pat:q.type==='meas'?A.meas:A[q.id];return v instanceof Set?v.size>0:v&&typeof v==='object'?Object.keys(v).length>0:v!=null};
 const patientMode=()=>!!S.start&&!S.sheet&&!S.paused&&S.mode!=='unc'&&!['start','summary','efile','look','pat','meas','handover'].includes(cur().type);
@@ -1362,13 +1370,13 @@ function conflicts(){
   return out;
 }
 const reIdx=id=>Q.findIndex((q,i)=>q.id===id&&(!q.ph||q.ph===S.phase)&&vis(i));
-function conflictBanner(){
+function conflictBanner(){return '';
   if(!S.start) return '';
   const c=conflicts().find(x=>!S.cfok.has(x.k)); if(!c) return '';
   const i=c.re.map(reIdx).find(x=>x>0);
   return `<div class="cfbanner ${c.type}"><b>${c.type==='c'?'⚠ ':''}${c.t}</b><span>${c.d}</span>${c.ask?`<span class="cfask">اسأله بصيغة أخرى: «${c.ask}»</span>`:''}<span class="cfbtns">${c.type==='c'&&i>0?`<button class="btn small accent" data-act="cfre" data-v="${i}">أعد السؤال</button>`:''}<button class="btn small ghost" data-act="cfok" data-v="${c.k}">${c.type==='c'?'الإجابتان صحيحتان':'تم'}</button></span></div>`;
 }
-function conflictsHTML(){
+function conflictsHTML(){return '';
   const all=conflicts(); if(!all.length) return '';
   return `<div class="sectionlabel">التحقق من الإجابات</div><div class="flags">${all.map(c=>`<div class="flag ${c.type==='w'?'w':''} ${S.cfok.has(c.k)&&c.type==='c'?'ok':''}"><b>${c.t}${c.type==='c'?(S.cfok.has(c.k)?' · أكّدته الحالة':' · لم يُتحقق منه'):''}</b>${c.d}</div>`).join('')}</div>`;
 }
@@ -1652,7 +1660,7 @@ function vStart(){
   const back='<button class="backlink" data-act="level" data-v="">تغيير فئة الحالة</button>';
   if(S.stage==='scanning') return `<div class="startwrap"><div class="startcard"><div class="scan">${svg(P.finger,'')}</div><h1>جارٍ قراءة البصمة…</h1><p>ضع إبهام الحالة على الماسح وثبّته.</p></div></div>`;
   if(S.stage==='calib') return `<div class="startwrap"><div class="startcard"><h1>معايرة تتبّع العين</h1><p>ثبّت الجهاز أمام وجه الحالة على بعد ٤٠–٦٠ سم، واطلب منه أن يتابع النقطة بعينيه.</p><div class="calib"><i></i></div></div></div>`;
-  if(S.stage==='adapt') return `<div class="adapt"><span class="chip modechip">${MODES[S.mode].t}</span><div class="adapthead"><h1>ملاءمة الجهاز للحالة</h1><button class="btn ghost" data-act="sheet">إعدادات مفصّلة</button><button class="btn accent" data-act="adaptok">متابعة</button></div><p>اختر ما ينطبق على الحالة، ويتكيّف الجهاز في طريقة الاختيار والألوان والأحجام وعدد الخيارات. إن لم يكن هناك ما يلزم، اضغط «متابعة» مباشرة.</p>${presetsHTML()}${symPicker()}${S.presets.has('lang')?`<div class="langpick">${row('لغة الحالة',seg('lang',[['en','English'],['ur','اردو'],['fr','Français']]),'تظهر الكلمات والسؤال بلغته، ومعها العربية')}</div>`:''}<div>${back}</div></div>`;
+  if(S.stage==='adapt') return `<div class="adapt simple"><h1>هل تحتاج الحالة تكييف الجهاز؟</h1><p class="adsub">اختر ما ينطبق، أو ابدأ مباشرة.</p>${presetsHTML()}<div class="adgo"><button class="btn accent big" data-act="adaptok">ابدأ</button></div><div><button class="backlink" data-act="role" data-v="${S.role}">رجوع</button></div></div>`;
   if(S.stage==='found') return `<div class="startwrap"><div class="startcard">
     <dl class="found"><h3>تم العثور على الملف الطبي</h3>
       <div><dt>رقم الملف</dt><dd>${FILE.id}</dd></div><div><dt>العمر</dt><dd>${AR(FILE.age)} سنة</dd></div>
@@ -1828,6 +1836,7 @@ function render(){
 }
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,2400)}
 function begin(withFile){
+  if(!G.page)G.page=PAGE.map(p=>({id:p[0],t:p[1]}));
   S.start=Date.now();
   if(withFile){S.file=FILE;A.age=FILE.band;A.look.age=FILE.band;S.fromFile.add('age:'+FILE.band);
     ['chronic','meds','allergy'].forEach(k=>FILE[k].forEach(id=>{A[k].add(id);S.fromFile.add(k+':'+id)}));}
@@ -1854,10 +1863,10 @@ document.addEventListener('click',e=>{
   if(a==='go') return go(+v);
   if(a==='next') return next();
   if(a==='prev') return prev();
-  if(a==='role'){S.role=v||null;S.proto=null;if(v==='lay')S.phase='scene';return render()}
+  if(a==='role'){S.role=v||null;S.proto=null;S.stage='proto';if(v==='lay')S.phase='scene';return render()}
   if(a==='proto'){
     if(!v){S.proto=null;S.stage='proto';S.mode=null;recompute();return render()}
-    S.proto=v;S.mode='touch';S.manual.access='tap';recompute();return begin(false);
+    S.proto=v;S.mode='touch';recompute();S.stage='adapt';return render();
   }
   if(a==='lk'){const was=A.look.age&&A.look.sex&&A.look.loc&&A.look.br&&A.look.circ;A.look[b.dataset.k]=v;if(b.dataset.k==='age')A.age=v;if(b.dataset.k==='sex')G.gpref[0].i=v==='f'?'c_fdoc':'c_mdoc';render();if(!was&&A.look.age&&A.look.sex&&A.look.loc&&A.look.br&&A.look.circ){clearTimeout(advT);advT=setTimeout(()=>{if(cur().type==='look')next()},700)}return}
   if(a==='where'){if(S.start)return;S.phase=v;return render()}
@@ -1911,7 +1920,7 @@ document.addEventListener('click',e=>{
   if(a==='resume'){S.paused=false;return render()}
   if(a==='pick'){
     const id=b.dataset.id;
-    if(q.type==='single'){A[q.id]=id;return autoNext()}
+    if(q.type==='single'){A[q.id]=id;if(q.id==='age'){A.look.age=id}if(q.id==='page'){A.pat.age=id}return autoNext()}
     const s=A[q.id];
     if(EXCL.includes(id)){s.clear();s.add(id);return autoNext()}
     EXCL.forEach(x=>s.delete(x)); s.has(id)?s.delete(id):s.add(id); return render();
