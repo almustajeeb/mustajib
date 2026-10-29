@@ -108,6 +108,34 @@ body.g-open{overflow:hidden}
 .sim-chip{position:absolute;top:118px;inset-inline-start:16px;background:rgba(0,0,0,.5);color:#fff;font-size:15px;padding:4px 12px;border-radius:999px}
 .ar-replay{position:absolute;bottom:80px;inset-inline-start:16px;width:56px;font-size:26px !important;padding:0 !important;background:rgba(27,43,75,.9) !important;color:#fff !important;border-color:transparent !important}
 @media (max-width:620px){.ar-turn{bottom:30%;font-size:24px}.ar-arrow{bottom:38%}.ar-mini{width:120px;height:120px}}
+/* ===== أبسط: شاشة الموقع، لوحة الخريطة، الكاميرا ===== */
+.g-locb{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+.g-locic{width:190px;height:190px;border-radius:50%;background:var(--orange-soft);display:grid;place-items:center;position:relative;margin-bottom:10px}
+.g-locic::after{content:"";position:absolute;inset:0;border-radius:50%;border:6px solid var(--orange);animation:gring 1.8s ease-out infinite}
+@keyframes gring{from{transform:scale(.8);opacity:1}to{transform:scale(1.25);opacity:0}}
+.g-locic svg{width:90px;height:120px;animation:gbob 1.2s ease-in-out infinite alternate}
+.g-sub{font-size:20px;color:var(--muted);margin:0 0 22px}
+.g-yn{display:flex;gap:16px;width:100%;max-width:620px}
+.g-yes,.g-no{flex:1;min-height:110px;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:24px;font-weight:700}
+.g-yes{background:var(--yes);color:#fff !important;box-shadow:0 8px 20px rgba(31,143,95,.3)}
+.g-no{background:var(--surface);border:2px solid var(--line) !important}
+.g-yes b,.g-no b{font-size:38px;line-height:1}
+.g-dest.big{flex-direction:column;text-align:center;gap:8px}
+.g-dest.big .g-dic svg{width:110px;height:110px}
+.g-dest.big b{font-size:28px}
+.g-go{display:flex;align-items:center;justify-content:center;gap:14px;background:var(--orange);color:#fff !important;border-radius:24px;min-height:100px;width:100%;box-shadow:0 8px 20px rgba(242,140,40,.35)}
+.g-go b{font-size:34px}
+.g-icons{display:flex;gap:12px;margin-top:auto}
+.g-ibtn{flex:1;background:var(--soft);border-radius:18px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.g-ibtn span{font-size:32px;line-height:1.1}.g-ibtn small{font-size:15px;color:var(--muted);font-weight:600}
+.g-gpsmall{margin-top:8px}
+.ar-top{inset-inline-end:auto;inset-inline-start:16px;max-width:calc(100% - 250px)}
+#ar-step{display:none !important}
+.ar-mini{top:16px;bottom:auto;inset-inline-end:16px;width:min(34vw,210px);height:min(34vw,210px);border-width:5px}
+.ar-mini::after{content:"▲";position:absolute;top:2px;left:50%;transform:translateX(-50%);color:#F28C28;font-size:16px;text-shadow:0 0 3px #fff}
+.ar-close{width:64px;height:64px;border-radius:50% !important;font-size:28px !important;padding:0 !important;bottom:20px;inset-inline-start:auto;inset-inline-end:20px}
+.ar-replay{width:64px;height:64px;border-radius:50% !important;bottom:20px;inset-inline-start:20px}
+@media (max-width:620px){.ar-top{max-width:calc(100% - 170px)}.ar-mini{width:130px;height:130px}.ar-top b{font-size:20px}.ar-top .g-dic svg{width:44px;height:44px}.g-yn{flex-direction:column}}
 </style>
 <link rel="manifest" href="app.webmanifest">
 <meta name="theme-color" content="#1B2B4B">
@@ -231,6 +259,9 @@ fr:{gps:'Trouver ma position',orTap:'ou touchez votre place sur la carte',locati
  gpsOn:'Position activée',fixTap:"Si le point bleu n'est pas à votre place, touchez votre place réelle.",ar:'Lancer la caméra',fwd:'Allez tout droit',right:'Tournez à droite',left:'Tournez à gauche',turn:'Faites demi-tour',arrived:'Vous êtes arrivé',
  noCam:'Caméra indisponible. Suivez la flèche.',noComp:'Boussole indisponible : pointe de la flèche = direction de la Qibla.',hold:"Levez l'appareil et dirigez la caméra devant vous",map:'Carte',then:'puis'}};
 Object.keys(T2).forEach(k=>Object.assign(T[k],T2[k]));
+const T3={"ar": {"share": "شارك موقعك المباشر", "shareSub": "لنرشدك إلى أقرب طريق", "allow": "سماح", "notNow": "لاحقًا", "go": "ابدأ"}, "en": {"share": "Share your live location", "shareSub": "So we can guide you the shortest way", "allow": "Allow", "notNow": "Not now", "go": "Start"}, "ur": {"share": "اپنا لائیو مقام شیئر کریں", "shareSub": "تاکہ ہم آپ کو قریب ترین راستہ دکھائیں", "allow": "اجازت دیں", "notNow": "ابھی نہیں", "go": "شروع کریں"}, "id": {"share": "Bagikan lokasi langsung Anda", "shareSub": "Agar kami tunjukkan jalan terdekat", "allow": "Izinkan", "notNow": "Nanti", "go": "Mulai"}, "tr": {"share": "Canlı konumunuzu paylaşın", "shareSub": "Size en kısa yolu gösterelim", "allow": "İzin ver", "notNow": "Şimdi değil", "go": "Başla"}, "fr": {"share": "Partagez votre position en direct", "shareSub": "Pour vous guider au plus court", "allow": "Autoriser", "notNow": "Plus tard", "go": "Commencer"}};
+Object.keys(T3).forEach(k=>Object.assign(T[k],T3[k]));
+
 
 /* ---------- ربط الخريطة بالإحداثيات (تقديري، ويُصحَّح ميدانيًا بلمسة) ----------
    مرجع: القبة الخضراء 24.4675611, 39.6114389 (ويكيبيديا) = نقطة الخريطة (605,309)
@@ -262,6 +293,13 @@ function top(backTo){
 function vLang(){
   return top(null)+`<div class="g-body"><h1>${esc(t('lang'))}</h1><div class="g-langs">${LANGS.map(([k,n,d])=>
    `<button class="g-lang ${G.lang===k?'on':''}" data-g="setlang" data-v="${k}" dir="${d}"><img src="${FL[k]}" alt=""><b>${n}</b></button>`).join('')}</div></div>`;
+}
+function vLoc(){
+  const busy=G.gmsg==='locating';
+  return top('lang')+`<div class="g-body g-locb"><div class="g-locic"><span>${IC.pin}</span></div>
+   <h1>${esc(t('share'))}</h1><p class="g-sub">${esc(t('shareSub'))}</p>
+   <div class="g-yn"><button class="g-yes" data-g="allow"><b>✓</b>${esc(busy?t('locating'):t('allow'))}</button>
+   <button class="g-no" data-g="skip"><b>✕</b>${esc(t('notNow'))}</button></div></div>`;
 }
 function vMenu(){
   return top('lang')+`<div class="g-body"><h1>${esc(t('where'))}</h1><div class="g-cats">${CATS.map(c=>
@@ -317,17 +355,16 @@ function vMap(){
   const p=G.here&&!G.setting?plan():null, c=G.cat;
   const compass=`<div class="g-compass"><span>▲</span>${esc(LBLQ())}</div>`;
   let panel;
-  if(!G.here||G.setting) panel=`<div class="g-ask">
-      <button class="g-gps" data-g="gps"><span>${IC.pin}</span><b>${esc(G.gmsg==='locating'?t('locating'):t('gps'))}</b></button>
+  const CAM='<svg viewBox="0 0 24 24" width="40" height="40"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  if(!G.here||G.setting) panel=`<div class="g-ask"><span class="g-pin">${IC.pin}</span><b>${esc(G.gps&&G.setting?t('fixTap'):t('tap'))}</b>
       ${G.gmsg&&G.gmsg!=='locating'?`<p class="g-note">${esc(t(G.gmsg))}</p>`:''}
-      ${G.gmsg&&G.gmsg!=='locating'?'':`<b class="g-or">${esc(G.gps&&G.setting?t('fixTap'):t('orTap'))}</b>`}</div>`;
+      ${G.gps?'':`<button class="g-btn g-gpsmall" data-g="gps">📍 ${esc(G.gmsg==='locating'?t('locating'):t('gps'))}</button>`}</div>`;
   else if(!p) panel=`<div class="g-ask"><b>—</b></div>`;
-  else panel=`<div class="g-dest"><span class="g-dic">${IC[c]}</span><div><small>${esc(p.msg?t('inside'):t('nearest'))}</small><b>${esc(p.msg?t(c):p.name)}</b>${p.approx?`<small class="g-approx">${esc(t('approx'))}</small>`:''}</div></div>`+
-    (p.path?`<button class="g-arbtn" data-g="ar"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>${esc(t('ar'))}</button>`:'')+
+  else panel=`<div class="g-dest big"><span class="g-dic">${IC[c]}</span><b>${esc(p.msg?t(c):p.name)}</b>${p.approx?`<small class="g-approx">${esc(t('approx'))}</small>`:''}</div>`+
+    (p.path?`<button class="g-go" data-g="ar">${CAM}<b>${esc(t('go'))}</b></button>`:'')+
     (p.msg?`<p class="g-note">${esc(p.msg)}</p>`:'')+
-    (p.path?stepList(p):'')+
     (p.note?`<p class="g-note">${esc(p.note)}</p>`:'')+
-    `${G.gps?`<p class="g-gpson">● ${esc(t('gpsOn'))}</p>`:''}<div class="g-acts"><button class="g-btn" data-g="change">${esc(t('change'))}</button>${p.path&&!G.full?`<button class="g-btn" data-g="full">${esc(t('full'))}</button>`:''}</div>`;
+    `<div class="g-icons"><button class="g-ibtn" data-g="change" aria-label="${esc(t('change'))}"><span>📍</span><small>${esc(t('change'))}</small></button>${p.path&&!G.full?`<button class="g-ibtn" data-g="full" aria-label="${esc(t('full'))}"><span>🗺️</span><small>${esc(t('full'))}</small></button>`:''}</div>`;
   return top('menu')+`<div class="g-mapwrap"><div class="g-mapbox">${mapSVG(p,fitVB(p),'g-map')}${compass}</div><div class="g-panel">${panel}</div></div>`;
 }
 const LBLQ=()=>({ar:'القبلة',en:'Qibla',ur:'قبلہ',id:'Kiblat',tr:'Kıble',fr:'Qibla'}[G.lang]);
@@ -339,12 +376,11 @@ const BR={N:0,E:90,S:180,W:270};
 function vAR(){
   return `<div class="ar"><div class="sim-bg" id="sim-bg" style="background-image:url('${SCENE}')"></div><div class="ar-shade"></div>
     <div class="ar-top"><span class="g-dic">${IC[G.cat]}</span><div><b id="ar-name"></b><span id="ar-step"></span></div></div>
-    <span class="sim-chip">${esc(SIMT[G.lang]||SIMT.ar)}</span>
     <div class="ar-arrow" id="ar-arrow"><div class="ar-rot" id="ar-rot">${ARW}</div></div>
     <div class="ar-turn" id="ar-turn"></div>
     <div class="ar-mini" data-g="armap" id="ar-mini"></div>
     <button class="g-btn ar-replay" data-g="ar" aria-label="replay">↻</button>
-    <button class="g-btn ar-close" data-g="arclose">${esc(t('map'))}</button></div>`;
+    <button class="g-btn ar-close" data-g="arclose" aria-label="${esc(t('map'))}">✕</button></div>`;
 }
 // مقاطع المسار: كل مقطع باتجاه واحد
 function legs(path){
@@ -422,7 +458,7 @@ function draw(){
   const l=LANGS.find(x=>x[0]===G.lang)||LANGS[0];
   box.setAttribute('dir',l[2]);box.setAttribute('lang',G.lang);document.documentElement.lang=G.lang;
   if(G.scr!=='ar')stopAR();
-  box.innerHTML=G.scr==='lang'?vLang():G.scr==='menu'?vMenu():G.scr==='ar'?vAR():vMap();
+  box.innerHTML=G.scr==='lang'?vLang():G.scr==='loc'?vLoc():G.scr==='menu'?vMenu():G.scr==='ar'?vAR():vMap();
 }
 box.addEventListener('click',e=>{
   const b=e.target.closest('[data-g]');if(!b)return;const a=b.dataset.g,v=b.dataset.v;
@@ -436,7 +472,9 @@ box.addEventListener('click',e=>{
     G.setting=false;G.full=false;ls.set('msj_g_here',G.here);return draw();
   }
   if(a==='gps')return startGPS(false);
-  if(a==='setlang'){G.lang=v;ls.set('msj_g_lang',v);G.scr='menu';return draw()}
+  if(a==='setlang'){G.lang=v;ls.set('msj_g_lang',v);G.scr=G.gps?'menu':'loc';return draw()}
+  if(a==='allow'){G.scr='menu';draw();return startGPS(true)}
+  if(a==='skip'){G.scr='menu';return draw()}
   if(a==='lang'){G.scr='lang';return draw()}
   if(a==='menu'){G.scr='menu';return draw()}
   if(a==='cat'){G.cat=v;G.scr='map';G.full=false;G.setting=!G.here;return draw()}
