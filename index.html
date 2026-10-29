@@ -967,6 +967,7 @@ class MSet extends Set{has(x){if(super.has(x))return true;for(const m of this)if
 (function(){const def={gi:['what','ألم في البطن أو قيء أو إسهال','Stomach pain, vomiting or diarrhea','belly'],dizf:['what','دوخة أو إغماء','Dizziness or fainting','faint'],headv:['what','صداع أو تغيّر في النظر','Headache or vision change','head'],pgi:['pwhat','ألم في البطن أو قيء أو إسهال','Stomach pain, vomiting or diarrhea','tummy'],phe:['pwhat','ألم في الرأس أو الأذن','Head or ear pain','head']};
  Object.entries(def).forEach(([id,[g,t,e,iconOf]])=>{const L=G[g],src=L.find(x=>x.id===iconOf);if(!src)return;const pos=Math.min(...MERGE[id].map(m=>L.findIndex(x=>x.id===m)).filter(n=>n>=0));
   const keep=L.filter(x=>!MERGE[id].includes(x.id));keep.splice(Math.min(pos,keep.length),0,{id,t,e,i:src.i});G[g]=keep});})();
+G.what=[{id:'chest',t:'ألم في الصدر',e:'Chest pain',i:'s_chest'},{id:'breath',t:'ضيق تنفس',e:'Short of breath',i:'s_breath'},{id:'weak',t:'ضعف في الأطراف',e:'Weakness in arms or legs',i:'s_weak'},{id:'head',t:'صداع',e:'Headache',i:'s_head'},{id:'vision',t:'تغيّر في النظر',e:'Vision change',i:'s_vision'},{id:'palp',t:'خفقان',e:'Palpitations',i:'s_palp'},{id:'belly',t:'ألم في البطن',e:'Belly pain',i:'s_stomach'},{id:'swallow',t:'صعوبة في البلع أو شيء عالق',e:'Trouble swallowing / something stuck',i:'c_drool'},{id:'allergy',t:'حساسية أو تورّم',e:'Allergy or swelling',i:'c_lips'}];
 reset();
 const $=id=>document.getElementById(id);
 const cur=()=>Q[S.i];
@@ -1854,7 +1855,7 @@ function render(){
 }
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,2400)}
 function begin(withFile){
-  Object.assign(TR,{'Hello, I am a service provider here to help you. Can you hear and understand me?':['السلام علیکم، میں خدمت فراہم کرنے والا ہوں اور آپ کی مدد کے لیے آیا ہوں۔ کیا آپ مجھے سن اور سمجھ سکتے ہیں؟','Bonjour, je suis un prestataire de service venu vous aider. M’entendez-vous et me comprenez-vous ?'],'Stomach pain, vomiting or diarrhea':['پیٹ میں درد، قے یا دست','Douleur au ventre, vomissements ou diarrhée'],'Dizziness or fainting':['چکر یا بے ہوشی','Vertiges ou évanouissement'],'Headache or vision change':['سر درد یا نظر میں تبدیلی','Mal de tête ou trouble de la vue'],'Head or ear pain':['سر یا کان میں درد','Douleur à la tête ou à l’oreille']});
+  Object.assign(TR,{'Weakness in arms or legs':['بازوؤں یا ٹانگوں میں کمزوری','Faiblesse des bras ou des jambes'],'Hello, I am a service provider here to help you. Can you hear and understand me?':['السلام علیکم، میں خدمت فراہم کرنے والا ہوں اور آپ کی مدد کے لیے آیا ہوں۔ کیا آپ مجھے سن اور سمجھ سکتے ہیں؟','Bonjour, je suis un prestataire de service venu vous aider. M’entendez-vous et me comprenez-vous ?'],'Stomach pain, vomiting or diarrhea':['پیٹ میں درد، قے یا دست','Douleur au ventre, vomissements ou diarrhée'],'Dizziness or fainting':['چکر یا بے ہوشی','Vertiges ou évanouissement'],'Headache or vision change':['سر درد یا نظر میں تبدیلی','Mal de tête ou trouble de la vue'],'Head or ear pain':['سر یا کان میں درد','Douleur à la tête ou à l’oreille']});
   if(!G.page)G.page=PAGE.map(p=>({id:p[0],t:p[1]}));
   S.start=Date.now();
   if(withFile){S.file=FILE;A.age=FILE.band;A.look.age=FILE.band;S.fromFile.add('age:'+FILE.band);
