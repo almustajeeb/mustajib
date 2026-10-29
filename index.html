@@ -918,8 +918,9 @@ reset();
 const $=id=>document.getElementById(id);
 const cur=()=>Q[S.i];
 const modeOk=q=>!q.m||q.m==='all'||!S.mode||(q.m==='unc'?S.mode==='unc':S.mode!=='unc');
-const LAY=['age','what','pwhat','pain_q','pain_where','allergy_q'];
-const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(S.role==='lay'&&q.type!=='summary'&&!LAY.includes(q.id))return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return !q.show||q.show()};
+const LAY=['age','what','pwhat','pain_where','allergy_q'];
+const LAYWHAT=['chest','breath','weak','bleed','allergy','faint','belly','fall','unk'];
+const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(S.role==='lay'&&q.type!=='summary'&&!LAY.includes(q.id))return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return (S.role==='lay'&&q.id==='pain_where')||!q.show||q.show()};
 const label=(g,id)=>(G[g].find(x=>x.id===id)||{}).t||id;
 const answered=q=>{const v=q.type==='look'?A.look:q.type==='pat'?A.pat:q.type==='meas'?A.meas:A[q.id];return v instanceof Set?v.size>0:v&&typeof v==='object'?Object.keys(v).length>0:v!=null};
 const patientMode=()=>!!S.start&&!S.sheet&&!S.paused&&S.mode!=='unc'&&!['start','summary','efile','look','pat','meas','handover'].includes(cur().type);
@@ -1162,6 +1163,13 @@ function vProto(){
   if(!S.role) return `<div class="protowrap"><h1>من يستخدم الجهاز؟</h1><p>المسعف يتعمّق ويتأكد، وغير المسعف يكتفي بالأهم.</p>
    <div class="protos two">${roleCard('pro','p_amb','مسعف','أسئلة أعمق مع أسئلة تأكيد، مرتّبة حسب المكان وفق CTAS.')}${roleCard('lay','s_crowd','غير مسعف','عسكري، أو منظّم حشود، أو مرافق: أسئلة قليلة، الأهم فقط.')}</div></div>`;
   const back=`<button class="backlink" data-act="role" data-v="">تغيير المستخدم</button>`;
+  if(S.role==='lay'&&S.gate!=='yes'){
+   if(S.gate==='no') return `<div class="protowrap"><div class="flag"><b>اطلب الإسعاف فورًا</b>الحالة غير واعية أو لا تتنفس طبيعيًا، فهي خارج نطاق «المستجيب».</div>
+     <div class="protos two"><a class="card proto" href="tel:997">${icon('q_amb')}<span class="ptx"><b>اتصل 997</b><small>الهلال الأحمر السعودي</small></span></a></div>
+     <p>إن كنت مدرّبًا، ابدأ الإنعاش القلبي الرئوي حتى يصل المسعف.</p><div><button class="backlink" data-act="gate" data-v="">رجوع</button></div></div>`;
+   return `<div class="protowrap"><h1>قبل البدء</h1><p>سؤال واحد يجيبه المبلّغ.</p><h1 style="margin-top:10px">هل الحالة واعية وتتنفس طبيعيًا؟</h1>
+     <div class="protos two"><button class="card proto" data-act="gate" data-v="yes">${icon('s_yes')}<span class="ptx"><b>نعم</b><small>تسمع وتفهم، وتنفسها طبيعي</small></span></button>
+     <button class="card proto" data-act="gate" data-v="no">${icon('s_no')}<span class="ptx"><b>لا</b><small>لا تستجيب، أو تنفسها غائب أو غير طبيعي</small></span></button></div><div>${back}</div></div>`;}
   if(S.role==='lay'){const langs=[['ar','العربية'],['en','English'],['ur','اردو'],['fr','Français']];
    return `<div class="protowrap"><h1>لغة الحالة</h1><p>تظهر الأسئلة بلغتها، ومعها العربية.</p>
    <div class="lkopts">${langs.map(([v,t])=>`<button class="lkbtn" data-act="cfg" data-k="lang" data-v="${v}" aria-pressed="${CFG.lang===v}">${t}</button>`).join('')}</div>
@@ -1679,7 +1687,7 @@ function vSingle(q){
   return pageGrid(it.filter(x=>!EXCL.includes(x.id)).map(x=>card(q,x,A[q.id]===x.id)),it.filter(x=>EXCL.includes(x.id)).map(x=>card(q,x,A[q.id]===x.id)),'');
 }
 function vMulti(q){
-  const it=G[q.g],s=A[q.id];
+  const it=(S.role==='lay'&&q.id==='what')?LAYWHAT.map(id=>G.what.find(x=>x.id===id)).filter(Boolean):G[q.g],s=A[q.id];
   return pageGrid(it.filter(x=>!EXCL.includes(x.id)).map(x=>card(q,x,s.has(x.id))),it.filter(x=>EXCL.includes(x.id)).map(x=>card(q,x,s.has(x.id))),doneCard(s.size));
 }
 /* body figure: parts on image-left side are mirrored to the right */
@@ -1751,7 +1759,8 @@ function vMap(){
      <div class="painlist">${s.length?s.map(x=>`<span class="pill">${x}</span>`).join(''):'<span class="none">تختار الحالة مكان الألم على الصورة بنفسها</span>'}</div>
      <div class="sectionlabel">أو</div>
      <div class="grid">
-      <button class="card ${A.pain_where.has('كل الجسم')?'sel':''}" data-act="painx" data-v="كل الجسم">${icon('s_body')}<span class="lb">${LB('في كل الجسم','All over')}</span></button>
+      ${S.role==='lay'?`<button class="card ${A.pain_q==='no'?'sel':''}" data-act="painx" data-v="__none">${icon('s_f0')}<span class="lb">${LB('لا يوجد ألم','No pain')}</span></button>`:''}
+      ${S.role==='lay'?'':`<button class="card ${A.pain_where.has('كل الجسم')?'sel':''}" data-act="painx" data-v="كل الجسم">${icon('s_body')}<span class="lb">${LB('في كل الجسم','All over')}</span></button>`}
       <button class="card soft ${A.pain_where.has('لا يعرف المكان')?'sel':''}" data-act="painx" data-v="لا يعرف المكان">${icon('s_unk')}<span class="lb">${LB('لا أعرف',"I don't know")}</span></button>
      </div>
      <div class="navrow">${stopCard()}${doneCard(s.length)}</div></div></div>`;
@@ -1806,6 +1815,7 @@ function render(){
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,2400)}
 function begin(withFile){
   S.start=Date.now();
+  try{navigator.geolocation&&navigator.geolocation.getCurrentPosition(p=>{S.geo={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy)}},()=>{},{timeout:8000,maximumAge:60000,enableHighAccuracy:true})}catch(e){}
   if(withFile){S.file=FILE;A.age=FILE.band;A.look.age=FILE.band;S.fromFile.add('age:'+FILE.band);
     ['chronic','meds','allergy'].forEach(k=>FILE[k].forEach(id=>{A[k].add(id);S.fromFile.add(k+':'+id)}));}
   first();
@@ -1831,6 +1841,7 @@ document.addEventListener('click',e=>{
   if(a==='go') return go(+v);
   if(a==='next') return next();
   if(a==='prev') return prev();
+  if(a==='gate'){S.gate=v||null;if(v==='yes'){A.look.loc='n';A.look.br='n'}return render()}
   if(a==='role'){S.role=v||null;S.proto=null;if(v==='lay')S.phase='scene';return render()}
   if(a==='proto'){
     if(!v){S.proto=null;S.stage='proto';S.mode=null;recompute();return render()}
@@ -1894,8 +1905,8 @@ document.addEventListener('click',e=>{
     if(EXCL.includes(id)){s.clear();s.add(id);return autoNext()}
     EXCL.forEach(x=>s.delete(x)); s.has(id)?s.delete(id):s.add(id); return render();
   }
-  if(a==='region'){const s=A.pain_where;['كل الجسم','لا يعرف المكان'].forEach(x=>s.delete(x));if(S.role==='lay'){s.clear();s.add(v);return autoNext()}s.has(v)?s.delete(v):s.add(v);return render()}
-  if(a==='painx'){const s=A.pain_where;s.clear();s.add(v);return autoNext()}
+  if(a==='region'){const s=A.pain_where;['كل الجسم','لا يعرف المكان'].forEach(x=>s.delete(x));if(S.role==='lay'){s.clear();s.add(v);A.pain_q='yes';return autoNext()}s.has(v)?s.delete(v):s.add(v);return render()}
+  if(a==='painx'){const s=A.pain_where;s.clear();if(v==='__none'){A.pain_q='no';return autoNext()}s.add(v);A.pain_q='yes';return autoNext()}
   if(a==='scale'){A[q.id]=+v;return autoNext()}
   if(a==='tohost'){const ph=S.phase;try{saveCase()}catch(e){console.error(e);toast('تعذّر حفظ الحالة')}reset(S.patient);S.phase=ph;$('timer').textContent='00:00';return render()}
   if(a==='reset'){const ph=S.phase;reset(S.patient);S.phase=ph;$('timer').textContent='00:00';return render()}
@@ -2006,7 +2017,7 @@ const MSJ_API = {
   function buildRecord(){
     const c=(()=>{try{return ctas()}catch(e){return null}})();
     const answers=[];
-    Q.forEach(q=>{try{if(q.type!=='start'&&q.type!=='summary'&&q.type!=='handover'&&(S.role!=='lay'||LAY.includes(q.id))&&(!q.ph||q.ph===S.phase)&&(!q.pro||q.pro.includes(S.proto))&&(!q.show||q.show())&&answered(q))
+    Q.forEach(q=>{try{if(q.type!=='start'&&q.type!=='summary'&&q.type!=='handover'&&(S.role!=='lay'||LAY.includes(q.id)||q.id==='pain_q')&&(!q.ph||q.ph===S.phase)&&(!q.pro||q.pro.includes(S.proto))&&(!q.show||q.show())&&answered(q))
       answers.push({id:q.id,section:q.sec||'',phase:q.ph||'',question:strip(q.ask||({look:'النظرة السريعة (من المسعف)',pat:'مثلث تقييم الطفل (من المسعف)',meas:'القياسات (من المسعف)'}[q.type])||q.id),answer:answerText(q)})}catch(e){}});
     // الملخص كما يظهر على الشاشة
     const summary=[...document.querySelectorAll('#work table.sumtable tr')].map(tr=>({
@@ -2025,7 +2036,7 @@ const MSJ_API = {
       duration_sec:S.start?Math.round((now-S.start)/1000):null,
       protocol:S.proto, protocol_name:(typeof PROTOS!=='undefined'&&PROTOS[S.proto])?strip(PROTOS[S.proto].s):S.proto,
       phase:S.phase, phase_name:(typeof PHASES!=='undefined'&&PHASES[S.phase])?PHASES[S.phase].t:S.phase,
-      role:S.role, mode:S.mode, presets:[...S.presets], language:CFG.lang, stops:S.stops,
+      role:S.role, safety_check:S.gate||null, location:S.geo||null, mode:S.mode, presets:[...S.presets], language:CFG.lang, stops:S.stops,
       file_id:S.file?S.file.id:null,
       ctas:c?{level:c.lvl,reasons:c.reasons||[]}:null, ctas_arrival:S.arrival, ctas_departure:S.departure,
       patient:(()=>{try{const kid=S.proto==='emsP';
