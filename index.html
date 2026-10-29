@@ -574,6 +574,9 @@ aside#rail{display:none!important}
 .langs .lkbtn{min-height:56px;font-size:19px;flex:1}
 .flag.simple{padding:10px 14px}
 .backlink{font-size:17px}
+.ctascard .ctype,.ctascard .en,.ctascard .ctasr small,.ctascard .ctasmore,.ctascard .also,.ctascard .ctasscale{display:none!important}
+.sumhead .chip,.sumhead .timechip{display:none}
+.sumtable tr:has(td .none){display:none}
 </style>
 <link rel="manifest" href="app.webmanifest">
 <meta name="theme-color" content="#1B2B4B">
@@ -940,11 +943,12 @@ function reset(keepPatient){
   S={role:(typeof S!=='undefined'&&S)?S.role:null,i:0,stage:'proto',proto:null,cfok:new Set,phase:'scene',done:new Set,arrival:null,departure:null,phaseT:{},doneAt:null,mode:null,file:null,start:null,patient:keepPatient||false,fromFile:new Set,log:[],advancing:false,page:0,fast:false,presets:new Set,manual:{},sheet:false,paused:false,stops:0,fastAuto:false};
   recompute();
 }
+[['what',['weak','seizure','wound','burn']],['pwhat',['burn','seizure','cry','limp']]].forEach(([g,ids])=>{G[g]=G[g].filter(x=>!ids.includes(x.id))});
 reset();
 const $=id=>document.getElementById(id);
 const cur=()=>Q[S.i];
 const modeOk=q=>!q.m||q.m==='all'||!S.mode||(q.m==='unc'?S.mode==='unc':S.mode!=='unc');
-const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(S.role==='lay'&&['look','pat','meas'].includes(q.type))return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return !q.show||q.show()};
+const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(['look','pat','meas','handover'].includes(q.type))return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return !q.show||q.show()};
 const label=(g,id)=>(G[g].find(x=>x.id===id)||{}).t||id;
 const answered=q=>{const v=q.type==='look'?A.look:q.type==='pat'?A.pat:q.type==='meas'?A.meas:A[q.id];return v instanceof Set?v.size>0:v&&typeof v==='object'?Object.keys(v).length>0:v!=null};
 const patientMode=()=>!!S.start&&!S.sheet&&!S.paused&&S.mode!=='unc'&&!['start','summary','efile','look','pat','meas','handover'].includes(cur().type);
@@ -1432,7 +1436,7 @@ function vSceneResult(){
     ['مؤشرات الخطر',detailPills(['reliab','chestk','onset','worst','hvis','when','still','swal','gib','hyd','alg','anx','preg','pobs','moi','headhit','bleedrisk','immuno'])]
   ];
   rows.push(['الألم',pain],['القياسات · من المسعف',measPills()],['الحساسية',A.allergy_q==='yes'?(A.allergy.size?lbs('allergy','allergy'):['نعم']):A.allergy_q==='no'?['لا توجد']:[]]);
-  if(S.role==='lay'){const keep=rows.filter(x=>!/المسعف/.test(x[0]));rows.splice(0,rows.length,...keep)}
+  {const keep=rows.filter(x=>!/المسعف|مثلث تقييم/.test(x[0]));rows.splice(0,rows.length,...keep)}
   return `<div class="sumhead"><span class="phbadge">في الموقع</span><h2>ما عبّرت عنه الحالة</h2><span class="chip timechip">${AR(secs)} ثانية</span><div class="hspace"></div>
     <button class="btn accent big" data-act="tohost">حفظ وإرسال</button></div>
    <div class="sum"><div>${tableOf(rows)}
@@ -1460,7 +1464,7 @@ function vAmbResult(){
     ['E · ما سبق الحادثة',[...lbs('event','event'),...lbs('moi','moi')],''],
     ['الاحتياج والراحة',lbs('feel','feel'),''],
     ['القياسات والعلاج',[...measPills(),...[...A.tx].filter(x=>x!=='none').map(x=>'أُعطي: '+TX.find(t=>t[0]===x)[1])],'']
-  ].filter(r=>!(kid&&/^(P · ما|Q|R|E)/.test(r[0])));
+  ].filter(r=>!(kid&&/^(P · ما|Q|R|E)/.test(r[0]))).filter(r=>!/القياسات/.test(r[0]));
   const note=S.arrival&&L&&L>S.arrival?`تحسّن من ${AR(S.arrival)} إلى ${AR(L)}. لا ينخفض المستوى بعد العلاج أكثر من مستويين عن مستوى الوصول (القاعدة ٣).`:S.arrival&&L&&L<S.arrival?`تدهور من ${AR(S.arrival)} إلى ${AR(L)}: أبلغ الطوارئ قبل الوصول (القاعدة ٢).`:'';
   return `<div class="sumhead"><span class="phbadge">في الإسعاف</span><h2>ما عبّرت عنه الحالة</h2><div class="hspace"></div>
     <button class="btn accent big" data-act="tohost">حفظ وإرسال</button></div>
