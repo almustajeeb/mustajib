@@ -1,5 +1,5 @@
 /* المستجيب: نسخة تعمل بدون إنترنت */
-const CACHE='msj-v3';
+const CACHE='msj-v4';
 const FILES=['./','index.html','dashboard.html','app.webmanifest','dash.webmanifest','icon-app-180.png','icon-app-192.png','icon-app-512.png','icon-dash-180.png','icon-dash-192.png','icon-dash-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

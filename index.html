@@ -548,6 +548,33 @@ h4.pg{margin:14px 0 6px;font:600 15px var(--f-display);color:var(--head)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<style id="simple">
+/* واجهة مبسّطة: نفس الهوية، أقل عناصر */
+header .tag,header .chip.demo,#modeChip,#patientChip,#axbtn,#pmode,#ctasChip{display:none!important}
+.app{grid-template-columns:minmax(0,1fr)!important}
+aside#rail{display:none!important}
+.prompt small{display:none}
+.prompt p{font-size:30px;line-height:1.35}
+.prompt .say{width:56px;height:56px}
+.app.lay .prompt .prio{display:none}
+#foot .lbl{display:none}
+#foot .btn{min-height:56px;font-size:18px;padding-inline:26px}
+.disc,.hostnote,.sysframe .syshead small{display:none!important}
+.protowrap h1{font-size:30px;margin:6px 0 12px}
+.protowrap h1.h2s{font-size:22px;margin-top:18px}
+.protowrap > p{display:none}
+.card.proto.big1{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.card.proto.big1 svg{width:104px;height:104px;flex:none}
+.card.proto.big1 .ptx{text-align:center}
+.card.proto.big1 .ptx b{font-size:30px}
+.app.st .prompt,.app.st #foot{display:none}
+.app.st{grid-template-rows:auto minmax(0,1fr)!important}
+.phcard.pick{min-height:72px}
+.phcard.pick b{font-size:20px}
+.langs .lkbtn{min-height:56px;font-size:19px;flex:1}
+.flag.simple{padding:10px 14px}
+.backlink{font-size:17px}
+</style>
 <link rel="manifest" href="app.webmanifest">
 <meta name="theme-color" content="#1B2B4B">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -566,7 +593,7 @@ h4.pg{margin:14px 0 6px;font:600 15px var(--f-display);color:var(--head)}
       <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><rect x="22" y="2" width="16" height="16" rx="4" fill="#F28C28"/><rect x="2" y="22" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><rect x="22" y="22" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="3"/></svg>
       <b>المستجيب</b>
     </div>
-    <div class="tag"><strong>صوت لمن لا صوت له</strong>للحالة غير القادرة على التعبير اللّفظي</div>
+    <div class="tag"><strong>خاصية التواصل في المسعف</strong>للحالة غير القادرة على التعبير اللّفظي</div>
     <div class="hspace"></div>
     <span class="chip demo" title="عرض توضيحي لفكرة خاصية مقترحة، غير رسمي وغير تابع للهيئة">عرض توضيحي</span>
     <span class="chip modechip" id="modeChip" hidden></span>
@@ -742,7 +769,6 @@ const Q=[
  {ph:'scene',id:'pat',sec:'look',type:'pat',pro:KD},
  {ph:'scene',id:'understand',sec:'greet',type:'yn',pro:AD,ask:'السلام عليكم، أنا مسعف وجئت لمساعدتك. هل تسمعني وتفهمني؟',e:'Hello, I am a paramedic here to help you. Can you hear and understand me?'},
  {ph:'scene',id:'reliab',sec:'greet',type:'yn',pro:AD,ask:'سؤال للتأكد: هل نحن الآن في الحرم؟',e:'Check question: are we at the Haram right now?',hint:'يتحقق من موثوقية نعم/لا ومن التوجّه للمكان (الجدول ٣)'},
- {ph:'scene',id:'age',sec:'event',type:'single',g:'age',pro:AD,ask:'كم عمرك تقريبًا؟',e:'About how old are you?',show:()=>S.role==='lay'},
  {ph:'scene',id:'what',sec:'event',type:'multi',g:'what',pro:AD,ask:'ماذا حدث لك؟ أشر إلى الصورة.',e:'What happened to you? Point to the picture.'},
  {ph:'scene',id:'pwhat',sec:'event',type:'multi',g:'pwhat',pro:KD,ask:'ما الذي يتعبك؟ أشر إلى الصورة.',e:'What is bothering you? Point to the picture.',hint:'يختار الطفل بنفسه، أو مرافقه إن كان صغيرًا'},
  {ph:'scene',id:'chestk',sec:'event',type:'multi',g:'chestk',pro:AD,ask:'كيف ألم الصدر؟ أشر إلى ما يشبهه.',e:'What is the chest pain like?',show:()=>W_('chest')},
@@ -918,9 +944,7 @@ reset();
 const $=id=>document.getElementById(id);
 const cur=()=>Q[S.i];
 const modeOk=q=>!q.m||q.m==='all'||!S.mode||(q.m==='unc'?S.mode==='unc':S.mode!=='unc');
-const LAY=['age','what','pwhat','pain_where','allergy_q'];
-const LAYWHAT=['chest','breath','weak','bleed','allergy','faint','belly','fall','unk'];
-const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(S.role==='lay'&&q.type!=='summary'&&!LAY.includes(q.id))return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return (S.role==='lay'&&q.id==='pain_where')||!q.show||q.show()};
+const vis=i=>{const q=Q[i];if(q.type==='start')return true;if(S.role==='lay'&&['look','pat','meas'].includes(q.type))return false;if(q.pro&&!q.pro.includes(S.proto))return false;if(q.ph&&q.ph!==S.phase)return false;if(q.once&&S.done.has(q.id))return false;return !q.show||q.show()};
 const label=(g,id)=>(G[g].find(x=>x.id===id)||{}).t||id;
 const answered=q=>{const v=q.type==='look'?A.look:q.type==='pat'?A.pat:q.type==='meas'?A.meas:A[q.id];return v instanceof Set?v.size>0:v&&typeof v==='object'?Object.keys(v).length>0:v!=null};
 const patientMode=()=>!!S.start&&!S.sheet&&!S.paused&&S.mode!=='unc'&&!['start','summary','efile','look','pat','meas','handover'].includes(cur().type);
@@ -1157,31 +1181,18 @@ const PROTOS={
 const secsSince=t=>Math.max(1,Math.round(((S.doneAt||Date.now())-t)/1000));
 
 function vProto(){
-  const card=k=>{const p=PROTOS[k];return `<button class="card proto" data-act="proto" data-v="${k}">${icon(p.i)}<span class="ptx"><b>${p.t}</b><small>${p.d}</small></span></button>`};
-  const where=p=>`<button class="phcard pick ${S.phase===p?'on':''}" data-act="where" data-v="${p}" aria-pressed="${S.phase===p}"><span class="phn">${PHASES[p].n}</span><div><b>${PHASES[p].t}</b><small>${PHASES[p].d}</small></div></button>`;
-  const roleCard=(v,ic,t,d)=>`<button class="card proto" data-act="role" data-v="${v}">${icon(ic)}<span class="ptx"><b>${t}</b><small>${d}</small></span></button>`;
-  if(!S.role) return `<div class="protowrap"><h1>من يستخدم الجهاز؟</h1><p>المسعف يتعمّق ويتأكد، وغير المسعف يكتفي بالأهم.</p>
-   <div class="protos two">${roleCard('pro','p_amb','مسعف','أسئلة أعمق مع أسئلة تأكيد، مرتّبة حسب المكان وفق CTAS.')}${roleCard('lay','s_crowd','غير مسعف','عسكري، أو منظّم حشود، أو مرافق: أسئلة قليلة، الأهم فقط.')}</div></div>`;
-  const back=`<button class="backlink" data-act="role" data-v="">تغيير المستخدم</button>`;
-  if(S.role==='lay'&&S.gate!=='yes'){
-   if(S.gate==='no') return `<div class="protowrap"><div class="flag"><b>اطلب الإسعاف فورًا</b>الحالة غير واعية أو لا تتنفس طبيعيًا، فهي خارج نطاق «المستجيب».</div>
-     <div class="protos two"><a class="card proto" href="tel:997">${icon('q_amb')}<span class="ptx"><b>اتصل 997</b><small>الهلال الأحمر السعودي</small></span></a></div>
-     <p>إن كنت مدرّبًا، ابدأ الإنعاش القلبي الرئوي حتى يصل المسعف.</p><div><button class="backlink" data-act="gate" data-v="">رجوع</button></div></div>`;
-   return `<div class="protowrap"><h1>قبل البدء</h1><p>سؤال واحد يجيبه المبلّغ.</p><h1 style="margin-top:10px">هل الحالة واعية وتتنفس طبيعيًا؟</h1>
-     <div class="protos two"><button class="card proto" data-act="gate" data-v="yes">${icon('s_yes')}<span class="ptx"><b>نعم</b><small>تسمع وتفهم، وتنفسها طبيعي</small></span></button>
-     <button class="card proto" data-act="gate" data-v="no">${icon('s_no')}<span class="ptx"><b>لا</b><small>لا تستجيب، أو تنفسها غائب أو غير طبيعي</small></span></button></div><div>${back}</div></div>`;}
-  if(S.role==='lay'){const langs=[['ar','العربية'],['en','English'],['ur','اردو'],['fr','Français']];
-   return `<div class="protowrap"><h1>لغة الحالة</h1><p>تظهر الأسئلة بلغتها، ومعها العربية.</p>
-   <div class="lkopts">${langs.map(([v,t])=>`<button class="lkbtn" data-act="cfg" data-k="lang" data-v="${v}" aria-pressed="${CFG.lang===v}">${t}</button>`).join('')}</div>
-   <h1 style="margin-top:14px">من الحالة؟</h1><p>تجيب الحالة بنفسها بالإشارة إلى الصور، ثم يُرسل البلاغ.</p>
-   <div class="protos two">${['emsA','emsP'].map(card).join('')}</div>
-   <div class="flag w" style="margin-top:6px"><b>للحالة الواعية فقط</b>إن كان لا يستجيب أو لا يتنفس: اطلب الإسعاف فورًا.</div><div>${back}</div></div>`;}
+  const big=(act,v,ic,t)=>`<button class="card proto big1" data-act="${act}" data-v="${v}">${icon(ic)}<span class="ptx"><b>${t}</b></span></button>`;
+  if(!S.role) return `<div class="protowrap"><h1>من يستخدم الجهاز؟</h1>
+   <div class="protos two">${big('role','pro','p_amb','مسعف')}${big('role','lay','s_crowd','غير مسعف')}</div></div>`;
+  const where=p=>`<button class="phcard pick ${S.phase===p?'on':''}" data-act="where" data-v="${p}" aria-pressed="${S.phase===p}"><span class="phn">${PHASES[p].n}</span><div><b>${PHASES[p].t}</b></div></button>`;
+  const langs=[['ar','العربية'],['en','English'],['ur','اردو'],['fr','Français']];
   return `<div class="protowrap">
-   <h1>أين أنت مع الحالة؟</h1><p>لكل مكان أسئلته الخاصة، مرتبة حسب أهميتها وفق نظام CTAS.</p>
-   <div class="phstrip">${PH_ORDER.map(where).join('')}</div>
-   <h1 style="margin-top:14px">من الحالة؟</h1><p>المسعف يسأل بصوته، والحالة تجيب بنفسها بالإشارة إلى الصور أو بتتبّع العين.</p>
-   <div class="protos two">${['emsA','emsP'].map(card).join('')}</div>
-   <div class="flag w" style="margin-top:6px"><b>للحالة الواعية فقط</b>إن كان لا يستجيب، أو في توقف قلب أو تنفس، أو في ضيق شديد أو صدمة: اتبع بروتوكول الإنعاش.</div><div>${back}</div></div>`;
+   ${S.role==='pro'?`<h1>أين أنت؟</h1><div class="phstrip">${PH_ORDER.map(where).join('')}</div>`:''}
+   <h1 class="h2s">لغة الحالة</h1><div class="lkopts langs">${langs.map(([v,t])=>`<button class="lkbtn" data-act="cfg" data-k="lang" data-v="${v}" aria-pressed="${CFG.lang===v}">${t}</button>`).join('')}</div>
+   <h1 class="h2s">من الحالة؟</h1>
+   <div class="protos two">${big('proto','emsA',PROTOS.emsA.i,PROTOS.emsA.t)}${big('proto','emsP',PROTOS.emsP.i,PROTOS.emsP.t)}</div>
+   <div class="flag w simple"><b>للحالة الواعية فقط</b></div>
+   <div><button class="backlink" data-act="role" data-v="">رجوع</button></div></div>`;
 }
 function segRow(act,key,label,opts,store,sub){
   return `<div class="lkrow"><div class="lkq">${label}${sub?`<small>${sub}</small>`:''}</div><div class="lkopts">${opts.map(([v,t,c])=>`<button class="lkbtn ${c||''}" data-act="${act}" data-k="${key}" data-v="${v}" aria-pressed="${store[key]===v}">${t}</button>`).join('')}</div></div>`;
@@ -1199,7 +1210,7 @@ const PATO={
 const lookOne=()=>['unc','seiz'].includes(A.look.loc)||['arrest','sev'].includes(A.look.br)||['arrest','shock'].includes(A.look.circ);
 const patOne=()=>A.pat.app==='unc'||A.pat.wob==='sev'||A.pat.circ==='shock';
 const SYSUSE='يُدخلها المسعف. المستجيب لا يجمعها، بل يقرؤها ليرتّب الأسئلة حسب أهميتها ويوجّه المسعف.';
-const sysWrap=(t,body)=>`<div class="sysframe"><div class="syshead"><span class="sysbadge">من المسعف</span><b>${t}</b><small>${SYSUSE}</small></div>${body}</div>`;
+const sysWrap=(t,body)=>`<div class="sysframe"><div class="syshead"><span class="sysbadge">للمسعف</span><b>${t}</b><small>${SYSUSE}</small></div>${body}</div>`;
 function vLook(){
   const L=A.look, ready=L.age&&L.sex&&L.loc&&L.br&&L.circ, one=lookOne();
   return sysWrap('النظرة السريعة',`<div class="lk"><p class="lkhint">انظر إلى الحالة ثوانٍ قبل أي سؤال، واختر ما تراه.</p><div class="flag w"><b>للحالة الواعية فقط</b>إن كان لا يستجيب، أو في توقف قلب أو تنفس، أو في ضيق شديد أو صدمة: هذه الأداة ليست له، اتبع بروتوكول الإنعاش.</div>
@@ -1421,9 +1432,9 @@ function vSceneResult(){
     ['مؤشرات الخطر',detailPills(['reliab','chestk','onset','worst','hvis','when','still','swal','gib','hyd','alg','anx','preg','pobs','moi','headhit','bleedrisk','immuno'])]
   ];
   rows.push(['الألم',pain],['القياسات · من المسعف',measPills()],['الحساسية',A.allergy_q==='yes'?(A.allergy.size?lbs('allergy','allergy'):['نعم']):A.allergy_q==='no'?['لا توجد']:[]]);
-  if(S.role==='lay')rows.splice(0,rows.length,['العمر',kid?[]:[A.age?label('age',A.age):null].filter(Boolean)],['الشكوى (اختارتها الحالة)',complaintPills()],['الألم',pain],['الحساسية',A.allergy_q==='yes'?['نعم']:A.allergy_q==='no'?['لا توجد']:[]]);
+  if(S.role==='lay'){const keep=rows.filter(x=>!/المسعف/.test(x[0]));rows.splice(0,rows.length,...keep)}
   return `<div class="sumhead"><span class="phbadge">في الموقع</span><h2>ما عبّرت عنه الحالة</h2><span class="chip timechip">${AR(secs)} ثانية</span><div class="hspace"></div>
-    <button class="btn accent big" data-act="tohost">حفظ وإرسال البلاغ</button></div>
+    <button class="btn accent big" data-act="tohost">حفظ وإرسال</button></div>
    <div class="sum"><div>${tableOf(rows)}
     <p class="disc">مستوى CTAS مبني على دليل المسعف «Prehospital CTAS Paramedic Guide» الإصدار ٢٫٠. يُعاد التقييم عند المغادرة إلى المستشفى (القاعدة ١).</p></div>
    <div>${ctasCard(c)}${conflictsHTML()}</div></div>`;
@@ -1452,7 +1463,7 @@ function vAmbResult(){
   ].filter(r=>!(kid&&/^(P · ما|Q|R|E)/.test(r[0])));
   const note=S.arrival&&L&&L>S.arrival?`تحسّن من ${AR(S.arrival)} إلى ${AR(L)}. لا ينخفض المستوى بعد العلاج أكثر من مستويين عن مستوى الوصول (القاعدة ٣).`:S.arrival&&L&&L<S.arrival?`تدهور من ${AR(S.arrival)} إلى ${AR(L)}: أبلغ الطوارئ قبل الوصول (القاعدة ٢).`:'';
   return `<div class="sumhead"><span class="phbadge">في الإسعاف</span><h2>ما عبّرت عنه الحالة</h2><div class="hspace"></div>
-    <button class="btn accent big" data-act="tohost">حفظ وإرسال البلاغ</button></div>
+    <button class="btn accent big" data-act="tohost">حفظ وإرسال</button></div>
    <div class="sum"><div>${tableOf(rows)}${note?`<p class="disc">${note}</p>`:''}</div>
    <div>${ctasCard(c)}<div class="sectionlabel">مؤشرات للفريق الطبي</div>${flagsHTML(clinFlags())}${conflictsHTML()}</div></div>`;
 }
@@ -1496,7 +1507,7 @@ function vErSummary(){
     ['أسئلته وطلباته',lbs('askdoc','askdoc')]
   ];
   return `<div class="sumhead"><span class="phbadge">في الطوارئ</span><h2>ما عبّرت عنه الحالة</h2><span class="chip">مدة التقييم ${AR(mins)} د</span>${c?ctasBadge(c):''}<div class="hspace"></div>
-    <button class="btn accent big" data-act="tohost">حفظ وإرسال البلاغ</button></div>
+    <button class="btn accent big" data-act="tohost">حفظ وإرسال</button></div>
    <div class="sum"><div><div class="sectionlabel" style="margin-top:0">ما قالته الحالة بنفسها</div>${tableOf(voice)}
      <div class="sectionlabel">كيف تتواصل مع الحالة</div><ul class="passport">${passport().map(x=>`<li>${x}</li>`).join('')}</ul></div>
    <div>${ctasCard(c)}<div class="sectionlabel">مؤشرات للفريق الطبي</div>${flagsHTML(clinFlags())}${conflictsHTML()}
@@ -1506,8 +1517,8 @@ function vSummary(q){return q.id==='sum_scene'?vSceneResult():q.id==='sum_amb'?v
 
 /* ---------- rail + prompt ---------- */
 function rail(){
-  const stepper=S.role==='lay'?'':`<div class="phsteps">${PH_ORDER.map(p=>`<div class="phstep ${p===S.phase?'on':''}"><span class="phn">${PHASES[p].n}</span><span>${PHASES[p].t}</span></div>`).join('')}</div>`;
-  if(!S.start){$('rail').innerHTML=`${S.role==='lay'?'':'<h2>أين أنت؟</h2>'}${stepper}<div class="railnote" ${S.role==='lay'?'hidden':''}>اختر المكان الذي أنت فيه مع الحالة. لكل مكان أسئلته الخاصة، ويعمل وحده دون الحاجة إلى المراحل الأخرى.</div>`;return;}
+  const stepper=`<div class="phsteps">${PH_ORDER.map(p=>`<div class="phstep ${p===S.phase?'on':''}"><span class="phn">${PHASES[p].n}</span><span>${PHASES[p].t}</span></div>`).join('')}</div>`;
+  if(!S.start){$('rail').innerHTML=`<h2>أين أنت؟</h2>${stepper}<div class="railnote">اختر المكان الذي أنت فيه مع الحالة. لكل مكان أسئلته الخاصة، ويعمل وحده دون الحاجة إلى المراحل الأخرى.</div>`;return;}
   const secs=Object.keys(SECS).filter(s=>s!=='start'&&Q.some((q,i)=>q.sec===s&&vis(i))); const cs=cur().sec;
   const fast=S.mode&&S.mode!=='unc'&&S.proto==='full'?`<button class="fastbtn" data-act="fast" aria-pressed="${S.fast}"><b>${S.fast?'تقييم سريع: مفعّل':'تقييم سريع'}</b><small>${S.fast?'الأسئلة الحرجة فقط · اضغط للتقييم الكامل':'الأسئلة الحرجة فقط عند ضيق الوقت'}</small></button>`:'';
   $('rail').innerHTML=stepper+`<h2>${PHASES[S.phase].t}</h2><div class="railctas">الأسئلة مرتبة حسب أهميتها وفق نظام CTAS</div>`+secs.map((s,n)=>{
@@ -1523,9 +1534,9 @@ function rail(){
 function promptBox(){
   const q=cur();let ask,h;
   if(q.type==='start'){ask={proto:'الحالة لا تستطيع التعبير اللّفظي: اختر مكانك، ثم من الحالة.',level:'كيف تجيب الحالة؟ بيدها أم بعينيها.',adapt:'اختر ما ينطبق على الحالة ليتكيّف الجهاز معها، أو تابع مباشرة.',calib:'اطلب من الحالة أن تتابع النقطة البرتقالية بعينيها.'}[S.stage]||'امسح بصمة إبهام الحالة لاسترجاع ملفها الطبي، أو تابع بدون ملف.';h='قبل التواصل';}
-  else if(q.id==='sum_scene'){ask='اطمئن، نحن معك ونعرف الآن ما تشعر به.';h='في الموقع · احفظ ما عبّرت عنه الحالة في بلاغ المسعف';}
-  else if(q.id==='sum_amb'){ask='نحن في الطريق إلى المستشفى، وأنت في أمان.';h='في الإسعاف · احفظ ما عبّرت عنه الحالة في بلاغ المسعف';}
-  else if(q.id==='sum_er'){ask='فريق الطوارئ سيعتني بك الآن، وأنت في أمان.';h='في الطوارئ · احفظ ما عبّرت عنه الحالة في بلاغ المسعف';}
+  else if(q.id==='sum_scene'){ask='اطمئن، نحن معك ونعرف الآن ما تشعر به.';h='في الموقع · احفظ ما عبّرت عنه الحالة ';}
+  else if(q.id==='sum_amb'){ask='نحن في الطريق إلى المستشفى، وأنت في أمان.';h='في الإسعاف · احفظ ما عبّرت عنه الحالة ';}
+  else if(q.id==='sum_er'){ask='فريق الطوارئ سيعتني بك الآن، وأنت في أمان.';h='في الطوارئ · احفظ ما عبّرت عنه الحالة ';}
   else if(q.type==='handover'){ask='التسليم: اقرأ للفريق بالترتيب.';h='للمسعف · المستوى ٣ · IMIST-AMBO';}
   else if(q.type==='summary'){ask=S.mode==='unc'?'راقب مجرى الهواء والتنفس والنبض أثناء النقل.':'نحن ننقلك الآن إلى المستشفى، وأنت في أمان.';h=S.mode==='unc'?'تذكير للمسعف':'طمئن الحالة، وسلّم الملخص لفريق الطوارئ';}
   else if(q.type==='look'){ask='من المسعف: النظرة السريعة.';h='يُدخلها المسعف  · المستجيب يقرؤها ليرتّب الأسئلة';}
@@ -1687,7 +1698,7 @@ function vSingle(q){
   return pageGrid(it.filter(x=>!EXCL.includes(x.id)).map(x=>card(q,x,A[q.id]===x.id)),it.filter(x=>EXCL.includes(x.id)).map(x=>card(q,x,A[q.id]===x.id)),'');
 }
 function vMulti(q){
-  const it=(S.role==='lay'&&q.id==='what')?LAYWHAT.map(id=>G.what.find(x=>x.id===id)).filter(Boolean):G[q.g],s=A[q.id];
+  const it=G[q.g],s=A[q.id];
   return pageGrid(it.filter(x=>!EXCL.includes(x.id)).map(x=>card(q,x,s.has(x.id))),it.filter(x=>EXCL.includes(x.id)).map(x=>card(q,x,s.has(x.id))),doneCard(s.size));
 }
 /* body figure: parts on image-left side are mirrored to the right */
@@ -1759,8 +1770,7 @@ function vMap(){
      <div class="painlist">${s.length?s.map(x=>`<span class="pill">${x}</span>`).join(''):'<span class="none">تختار الحالة مكان الألم على الصورة بنفسها</span>'}</div>
      <div class="sectionlabel">أو</div>
      <div class="grid">
-      ${S.role==='lay'?`<button class="card ${A.pain_q==='no'?'sel':''}" data-act="painx" data-v="__none">${icon('s_f0')}<span class="lb">${LB('لا يوجد ألم','No pain')}</span></button>`:''}
-      ${S.role==='lay'?'':`<button class="card ${A.pain_where.has('كل الجسم')?'sel':''}" data-act="painx" data-v="كل الجسم">${icon('s_body')}<span class="lb">${LB('في كل الجسم','All over')}</span></button>`}
+      <button class="card ${A.pain_where.has('كل الجسم')?'sel':''}" data-act="painx" data-v="كل الجسم">${icon('s_body')}<span class="lb">${LB('في كل الجسم','All over')}</span></button>
       <button class="card soft ${A.pain_where.has('لا يعرف المكان')?'sel':''}" data-act="painx" data-v="لا يعرف المكان">${icon('s_unk')}<span class="lb">${LB('لا أعرف',"I don't know")}</span></button>
      </div>
      <div class="navrow">${stopCard()}${doneCard(s.length)}</div></div></div>`;
@@ -1807,7 +1817,7 @@ function render(){
   if(c){cc.innerHTML=ctasBadge(c);cc.title=`الوصول للطبيب ${TTP[c.lvl]} · ${DEST[c.lvl]} · السبب: ${c.reasons.join('، ')}`;}
   $('patientChip').hidden=true;
   if(false){S.fastAuto=true;S.fast=true;toast(`CTAS ${AR(c.lvl)}: تم تفعيل التقييم السريع (الأسئلة الحرجة فقط)`);rail();}
-  app.classList.toggle('patient',S.patient);$('pmode').setAttribute('aria-pressed',S.patient);
+  app.classList.toggle('patient',S.patient);app.classList.toggle('lay',S.role==='lay');app.classList.toggle('st',cur().type==='start');$('pmode').setAttribute('aria-pressed',S.patient);
   app.classList.toggle('noscroll',patientMode()&&CFG.access!=='tap');
   sheet();
   const pz=$('pause');pz.hidden=!S.paused;
@@ -1815,7 +1825,6 @@ function render(){
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,2400)}
 function begin(withFile){
   S.start=Date.now();
-  try{navigator.geolocation&&navigator.geolocation.getCurrentPosition(p=>{S.geo={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),acc:Math.round(p.coords.accuracy)}},()=>{},{timeout:8000,maximumAge:60000,enableHighAccuracy:true})}catch(e){}
   if(withFile){S.file=FILE;A.age=FILE.band;A.look.age=FILE.band;S.fromFile.add('age:'+FILE.band);
     ['chronic','meds','allergy'].forEach(k=>FILE[k].forEach(id=>{A[k].add(id);S.fromFile.add(k+':'+id)}));}
   first();
@@ -1841,11 +1850,10 @@ document.addEventListener('click',e=>{
   if(a==='go') return go(+v);
   if(a==='next') return next();
   if(a==='prev') return prev();
-  if(a==='gate'){S.gate=v||null;if(v==='yes'){A.look.loc='n';A.look.br='n'}return render()}
   if(a==='role'){S.role=v||null;S.proto=null;if(v==='lay')S.phase='scene';return render()}
   if(a==='proto'){
     if(!v){S.proto=null;S.stage='proto';S.mode=null;recompute();return render()}
-    S.proto=v;if(S.role==='lay'){S.mode='touch';recompute();return begin(false)}S.stage='level';return render();
+    S.proto=v;S.mode='touch';S.manual.access='tap';recompute();return begin(false);
   }
   if(a==='lk'){const was=A.look.age&&A.look.sex&&A.look.loc&&A.look.br&&A.look.circ;A.look[b.dataset.k]=v;if(b.dataset.k==='age')A.age=v;if(b.dataset.k==='sex')G.gpref[0].i=v==='f'?'c_fdoc':'c_mdoc';render();if(!was&&A.look.age&&A.look.sex&&A.look.loc&&A.look.br&&A.look.circ){clearTimeout(advT);advT=setTimeout(()=>{if(cur().type==='look')next()},700)}return}
   if(a==='where'){if(S.start)return;S.phase=v;return render()}
@@ -1899,14 +1907,13 @@ document.addEventListener('click',e=>{
   if(a==='resume'){S.paused=false;return render()}
   if(a==='pick'){
     const id=b.dataset.id;
-    if(q.type==='single'){A[q.id]=id;if(q.id==='age')A.look.age=id;return autoNext()}
+    if(q.type==='single'){A[q.id]=id;return autoNext()}
     const s=A[q.id];
-    if(S.role==='lay'&&(q.id==='what'||q.id==='pwhat')){s.clear();s.add(id);return autoNext()}
     if(EXCL.includes(id)){s.clear();s.add(id);return autoNext()}
     EXCL.forEach(x=>s.delete(x)); s.has(id)?s.delete(id):s.add(id); return render();
   }
-  if(a==='region'){const s=A.pain_where;['كل الجسم','لا يعرف المكان'].forEach(x=>s.delete(x));if(S.role==='lay'){s.clear();s.add(v);A.pain_q='yes';return autoNext()}s.has(v)?s.delete(v):s.add(v);return render()}
-  if(a==='painx'){const s=A.pain_where;s.clear();if(v==='__none'){A.pain_q='no';return autoNext()}s.add(v);A.pain_q='yes';return autoNext()}
+  if(a==='region'){const s=A.pain_where;['كل الجسم','لا يعرف المكان'].forEach(x=>s.delete(x));s.has(v)?s.delete(v):s.add(v);return render()}
+  if(a==='painx'){const s=A.pain_where;s.clear();s.add(v);return autoNext()}
   if(a==='scale'){A[q.id]=+v;return autoNext()}
   if(a==='tohost'){const ph=S.phase;try{saveCase()}catch(e){console.error(e);toast('تعذّر حفظ الحالة')}reset(S.patient);S.phase=ph;$('timer').textContent='00:00';return render()}
   if(a==='reset'){const ph=S.phase;reset(S.patient);S.phase=ph;$('timer').textContent='00:00';return render()}
@@ -2017,7 +2024,7 @@ const MSJ_API = {
   function buildRecord(){
     const c=(()=>{try{return ctas()}catch(e){return null}})();
     const answers=[];
-    Q.forEach(q=>{try{if(q.type!=='start'&&q.type!=='summary'&&q.type!=='handover'&&(S.role!=='lay'||LAY.includes(q.id)||q.id==='pain_q')&&(!q.ph||q.ph===S.phase)&&(!q.pro||q.pro.includes(S.proto))&&(!q.show||q.show())&&answered(q))
+    Q.forEach(q=>{try{if(q.type!=='start'&&q.type!=='summary'&&q.type!=='handover'&&(!q.ph||q.ph===S.phase)&&(!q.pro||q.pro.includes(S.proto))&&(!q.show||q.show())&&answered(q))
       answers.push({id:q.id,section:q.sec||'',phase:q.ph||'',question:strip(q.ask||({look:'النظرة السريعة (من المسعف)',pat:'مثلث تقييم الطفل (من المسعف)',meas:'القياسات (من المسعف)'}[q.type])||q.id),answer:answerText(q)})}catch(e){}});
     // الملخص كما يظهر على الشاشة
     const summary=[...document.querySelectorAll('#work table.sumtable tr')].map(tr=>({
@@ -2036,7 +2043,7 @@ const MSJ_API = {
       duration_sec:S.start?Math.round((now-S.start)/1000):null,
       protocol:S.proto, protocol_name:(typeof PROTOS!=='undefined'&&PROTOS[S.proto])?strip(PROTOS[S.proto].s):S.proto,
       phase:S.phase, phase_name:(typeof PHASES!=='undefined'&&PHASES[S.phase])?PHASES[S.phase].t:S.phase,
-      role:S.role, safety_check:S.gate||null, location:S.geo||null, mode:S.mode, presets:[...S.presets], language:CFG.lang, stops:S.stops,
+      role:S.role, mode:S.mode, presets:[...S.presets], language:CFG.lang, stops:S.stops,
       file_id:S.file?S.file.id:null,
       ctas:c?{level:c.lvl,reasons:c.reasons||[]}:null, ctas_arrival:S.arrival, ctas_departure:S.departure,
       patient:(()=>{try{const kid=S.proto==='emsP';
