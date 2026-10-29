@@ -786,7 +786,7 @@ const Q=[
  {id:'page',sec:'event',type:'single',g:'page',pro:KD,ask:'كم عمر الطفل تقريبًا؟',e:'About how old is the child?'},
  {ph:'scene',id:'look',sec:'look',type:'look',pro:AD},
  {ph:'scene',id:'pat',sec:'look',type:'pat',pro:KD},
- {ph:'scene',id:'understand',sec:'greet',type:'yn',pro:AD,ask:'السلام عليكم، أنا مسعف وجئت لمساعدتك. هل تسمعني وتفهمني؟',e:'Hello, I am a paramedic here to help you. Can you hear and understand me?'},
+ {ph:'scene',id:'understand',sec:'greet',type:'yn',pro:AD,get ask(){return S.role==='lay'?'السلام عليكم، أنا مزوّد خدمة وجئت لمساعدتك. هل تسمعني وتفهمني؟':'السلام عليكم، أنا مسعف وجئت لمساعدتك. هل تسمعني وتفهمني؟'},get e(){return S.role==='lay'?'Hello, I am a service provider here to help you. Can you hear and understand me?':'Hello, I am a paramedic here to help you. Can you hear and understand me?'}},
  {ph:'scene',id:'reliab',sec:'greet',type:'yn',pro:AD,ask:'سؤال للتأكد: هل نحن الآن في الحرم؟',e:'Check question: are we at the Haram right now?',hint:'يتحقق من موثوقية نعم/لا ومن التوجّه للمكان (الجدول ٣)'},
  {ph:'scene',id:'what',sec:'event',type:'multi',g:'what',pro:AD,ask:'ماذا حدث لك؟ أشر إلى الصورة.',e:'What happened to you? Point to the picture.'},
  {ph:'scene',id:'pwhat',sec:'event',type:'multi',g:'pwhat',pro:KD,ask:'ما الذي يتعبك؟ أشر إلى الصورة.',e:'What is bothering you? Point to the picture.',hint:'يختار الطفل بنفسه، أو مرافقه إن كان صغيرًا'},
@@ -956,12 +956,17 @@ const fmtS=ms=>AR(String(ms/1000)).replace('.','٫')+' ث';
 /* ---------- state ---------- */
 let A,S,advT=null;
 function reset(keepPatient){
-  A={look:{},pat:{},meas:{},tx:new Set}; Q.forEach(q=>{if(q.type==='multi'||q.type==='map')A[q.id]=new Set});
+  A={look:{},pat:{},meas:{},tx:new Set}; Q.forEach(q=>{if(q.type==='multi'||q.type==='map')A[q.id]=(q.id==='what'||q.id==='pwhat')?new MSet:new Set});
   S={role:(typeof S!=='undefined'&&S)?S.role:null,i:0,stage:'proto',proto:null,cfok:new Set,phase:'scene',done:new Set,arrival:null,departure:null,phaseT:{},doneAt:null,mode:null,file:null,start:null,patient:keepPatient||false,fromFile:new Set,log:[],advancing:false,page:0,fast:false,presets:new Set,manual:{},sheet:false,paused:false,stops:0,fastAuto:false};
   recompute();
 }
 [['what',['weak','seizure','wound','burn']],['pwhat',['burn','seizure','cry','limp']]].forEach(([g,ids])=>{G[g]=G[g].filter(x=>!ids.includes(x.id))});
 G.age=G.age.filter(x=>x.id!=='unk').concat(G.age.filter(x=>x.id==='unk'));
+const MERGE={gi:['belly','nausea'],dizf:['dizzy','faint'],headv:['head','vision'],pgi:['tummy','vomit','diarr'],phe:['head','ear']};
+class MSet extends Set{has(x){if(super.has(x))return true;for(const m of this)if(MERGE[m]&&MERGE[m].includes(x))return true;return false}}
+(function(){const def={gi:['what','ألم في البطن أو قيء أو إسهال','Stomach pain, vomiting or diarrhea','belly'],dizf:['what','دوخة أو إغماء','Dizziness or fainting','faint'],headv:['what','صداع أو تغيّر في النظر','Headache or vision change','head'],pgi:['pwhat','ألم في البطن أو قيء أو إسهال','Stomach pain, vomiting or diarrhea','tummy'],phe:['pwhat','ألم في الرأس أو الأذن','Head or ear pain','head']};
+ Object.entries(def).forEach(([id,[g,t,e,iconOf]])=>{const L=G[g],src=L.find(x=>x.id===iconOf);if(!src)return;const pos=Math.min(...MERGE[id].map(m=>L.findIndex(x=>x.id===m)).filter(n=>n>=0));
+  const keep=L.filter(x=>!MERGE[id].includes(x.id));keep.splice(Math.min(pos,keep.length),0,{id,t,e,i:src.i});G[g]=keep});})();
 reset();
 const $=id=>document.getElementById(id);
 const cur=()=>Q[S.i];
@@ -1849,6 +1854,7 @@ function render(){
 }
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,2400)}
 function begin(withFile){
+  Object.assign(TR,{'Hello, I am a service provider here to help you. Can you hear and understand me?':['السلام علیکم، میں خدمت فراہم کرنے والا ہوں اور آپ کی مدد کے لیے آیا ہوں۔ کیا آپ مجھے سن اور سمجھ سکتے ہیں؟','Bonjour, je suis un prestataire de service venu vous aider. M’entendez-vous et me comprenez-vous ?'],'Stomach pain, vomiting or diarrhea':['پیٹ میں درد، قے یا دست','Douleur au ventre, vomissements ou diarrhée'],'Dizziness or fainting':['چکر یا بے ہوشی','Vertiges ou évanouissement'],'Headache or vision change':['سر درد یا نظر میں تبدیلی','Mal de tête ou trouble de la vue'],'Head or ear pain':['سر یا کان میں درد','Douleur à la tête ou à l’oreille']});
   if(!G.page)G.page=PAGE.map(p=>({id:p[0],t:p[1]}));
   S.start=Date.now();
   if(withFile){S.file=FILE;A.age=FILE.band;A.look.age=FILE.band;S.fromFile.add('age:'+FILE.band);
